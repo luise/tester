@@ -6,6 +6,11 @@ This repository contains a Quilt spec for a Jenkins deployment that tests
 It also contains a custom Docker image because we require some build tools and
 Jenkins plugins for our testing job.
 
+Note that by default the quilt-tester job has the `--preserve-failed` flag enabled.
+This flag leaves machines up if there were any test failures to facilitate debugging.
+Thus, if running locally, you may have to manually destroy the quilt-tester machines
+if your final test run ends in a failure.
+
 ## Deploying
 `tester.js` contains a module that creates a Jenkins service. It requires some
 configuration options to be passed in by the caller. An example is included at

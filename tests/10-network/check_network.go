@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -22,12 +24,23 @@ const anyIPAllowed = "0.0.0.0"
 
 var externalHostnames = []string{"google.com", "facebook.com", "en.wikipedia.org"}
 
+type testFailure struct {
+	target string
+	err    error
+}
+
+func (tf testFailure) String() string {
+	if tf.err != nil {
+		return fmt.Sprintf("%s: %s", tf.target, tf.err)
+	}
+	return tf.target
+}
+
 type testResult struct {
 	container        db.Container
-	pingUnauthorized []string
-	pingUnreachable  []string
-	dnsIncorrect     []string
-	dnsNotFound      []string
+	pingUnauthorized []testFailure
+	pingUnreachable  []testFailure
+	dnsIncorrect     []testFailure
 }
 
 func main() {
@@ -76,13 +89,6 @@ func main() {
 			fmt.Println(".. FAILED, hostnames resolved incorrectly")
 			for _, incorrect := range res.dnsIncorrect {
 				fmt.Printf(".... %s\n", incorrect)
-			}
-		}
-		if len(res.dnsNotFound) != 0 {
-			failed = true
-			fmt.Println(".. FAILED, couldn't resolve hostnames")
-			for _, notFound := range res.dnsNotFound {
-				fmt.Printf(".... %s\n", notFound)
 			}
 		}
 	}
@@ -201,6 +207,7 @@ func newNetworkTester(clnt client.Client) (networkTester, error) {
 type pingResult struct {
 	target    string
 	reachable bool
+	err       error
 }
 
 // We have to limit our parallelization because each `quilt exec` creates a new SSH login
@@ -219,10 +226,11 @@ func (tester networkTester) pingAll(container db.Container) []pingResult {
 		go func() {
 			defer wg.Done()
 			for ip := range pingRequests {
-				_, reachable := ping(container.StitchID, ip)
+				_, err := ping(container.StitchID, ip)
 				pingResultsChan <- pingResult{
 					target:    ip,
-					reachable: reachable,
+					reachable: err == nil,
+					err:       err,
 				}
 			}
 		}()
@@ -310,35 +318,34 @@ func (tester networkTester) test(container db.Container) testResult {
 		})
 	}
 	pingResults := tester.pingAll(container)
-	_, failures, _ := join.HashJoin(pingSlice(expPings), pingSlice(pingResults),
-		nil, nil)
+	_, _, failures := join.HashJoin(pingSlice(expPings), pingSlice(pingResults),
+		ignoreErrorField, ignoreErrorField)
 
-	var pingUnreachable, pingUnauthorized []string
+	var pingUnreachable, pingUnauthorized []testFailure
 	for _, badIntf := range failures {
 		bad := badIntf.(pingResult)
+		failure := testFailure{bad.target, bad.err}
 		if bad.reachable {
-			pingUnreachable = append(pingUnreachable, bad.target)
+			pingUnauthorized = append(pingUnauthorized, failure)
 		} else {
-			pingUnauthorized = append(pingUnauthorized, bad.target)
+			pingUnreachable = append(pingUnreachable, failure)
 		}
 	}
 
 	lookupResults := tester.lookupAll(container)
 
-	var dnsIncorrect, dnsNotFound []string
+	var dnsIncorrect []testFailure
 	for _, l := range lookupResults {
-		if l.err != nil {
-			msg := fmt.Sprintf("%s: %s", l.hostname, l.err)
-			dnsNotFound = append(dnsNotFound, msg)
+		expIP := tester.hostnameIPMap[l.hostname]
+		if l.err == nil && (expIP == anyIPAllowed || l.ip == expIP) {
 			continue
 		}
 
-		expIP := tester.hostnameIPMap[l.hostname]
-		if l.ip != expIP && expIP != anyIPAllowed {
-			msg := fmt.Sprintf("%s => %s (expected %s)", l.hostname, l.ip,
-				expIP)
-			dnsIncorrect = append(dnsIncorrect, msg)
+		err := l.err
+		if err == nil {
+			err = fmt.Errorf("%s => %s (expected %s)", l.hostname, l.ip, expIP)
 		}
+		dnsIncorrect = append(dnsIncorrect, testFailure{l.hostname, err})
 	}
 
 	return testResult{
@@ -346,34 +353,48 @@ func (tester networkTester) test(container db.Container) testResult {
 		pingUnreachable:  pingUnreachable,
 		pingUnauthorized: pingUnauthorized,
 		dnsIncorrect:     dnsIncorrect,
-		dnsNotFound:      dnsNotFound,
+	}
+}
+
+func ignoreErrorField(pingResultIntf interface{}) interface{} {
+	return pingResult{
+		target:    pingResultIntf.(pingResult).target,
+		reachable: pingResultIntf.(pingResult).reachable,
 	}
 }
 
 // ping `target` from within container `id` with 3 packets, with a timeout of
 // 1 second for each packet.
-func ping(id string, target string) (string, bool) {
-	outBytes, err := exec.Command(
-		"quilt", "ssh", id, "ping", "-c", "3", "-W", "1", target).
-		CombinedOutput()
-	return string(outBytes), err == nil
+func ping(id string, target string) (string, error) {
+	return quiltSSH(id, "ping", "-c", "3", "-W", "1", target)
 }
 
 func lookup(id string, hostname string) (string, error) {
-	outBytes, err := exec.Command(
-		"quilt", "ssh", id, "getent", "hosts", hostname).
-		CombinedOutput()
+	stdout, err := quiltSSH(id, "getent", "hosts", hostname)
 	if err != nil {
 		return "", err
 	}
 
-	fields := strings.Fields(string(outBytes))
+	fields := strings.Fields(stdout)
 	if len(fields) < 2 {
 		return "", fmt.Errorf("parse error: expected %q to have at "+
 			"least 2 fields", fields)
 	}
 
 	return fields[0], nil
+}
+
+func quiltSSH(id string, cmd ...string) (string, error) {
+	execCmd := exec.Command("quilt", append([]string{"ssh", id}, cmd...)...)
+	stderrBytes := bytes.NewBuffer(nil)
+	execCmd.Stderr = stderrBytes
+
+	stdoutBytes, err := execCmd.Output()
+	if err != nil {
+		err = errors.New(stderrBytes.String())
+	}
+
+	return string(stdoutBytes), err
 }
 
 type pingSlice []pingResult

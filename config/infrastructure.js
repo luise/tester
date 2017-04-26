@@ -14,5 +14,5 @@ MachineDeployer.prototype.deploy = function(deployment) {
     deployment.deploy(baseMachine.asWorker().replicate(this.nWorker));
 }
 
-// We will have four worker machines.
+// We will have three worker machines.
 module.exports = new MachineDeployer(3);

@@ -280,7 +280,7 @@ func (ts *testSuite) run() error {
 	}
 
 	// Wait a little bit longer for any container bootstrapping after boot.
-	time.Sleep(120 * time.Second)
+	time.Sleep(30 * time.Second)
 
 	var err error
 	if ts.test != "" {

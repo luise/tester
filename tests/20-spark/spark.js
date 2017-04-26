@@ -6,7 +6,7 @@ var infrastructure = require("github.com/quilt/tester/config/infrastructure");
 // same node. sprk.public says that the containers should be allowed to talk
 // on the public internet. sprk.job causes Spark to run that job when it
 // boots.
-var sprk = new spark.Spark(1, 3)
+var sprk = new spark.Spark(1, infrastructure.nWorker-1)
     .exclusive()
     .public()
     .job("run-example SparkPi");

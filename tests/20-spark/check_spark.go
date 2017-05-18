@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/quilt/quilt/api"
 	"github.com/quilt/quilt/api/client/getter"
+	"github.com/quilt/quilt/util"
 )
 
 func main() {
@@ -45,15 +47,21 @@ func main() {
 		log.Fatal("FAILED, unable to find StitchID of Spark master.")
 	}
 
-	logs, err := exec.Command("quilt", "logs", id).CombinedOutput()
+	// The Spark job takes some time to complete, so we wait for the appropriate
+	// result for up to a minute.
+	err = util.WaitFor(func() bool {
+		logs, err := exec.Command("quilt", "logs", id).CombinedOutput()
+		if err != nil {
+			log.WithError(err).Fatal("FAILED, Unable to get Spark master logs.")
+			return false
+		}
+
+		fmt.Printf("`quilt logs %s` output:\n", id)
+		fmt.Println(string(logs))
+		return strings.Contains(string(logs), "Pi is roughly")
+	}, 5*time.Second, time.Minute)
+
 	if err != nil {
-		log.WithError(err).Fatal("FAILED, unable to get Spark master logs.")
-	}
-
-	fmt.Printf("`quilt logs %s` output:\n", id)
-	fmt.Println(string(logs))
-
-	if !strings.Contains(string(logs), "Pi is roughly") {
 		fmt.Println("FAILED, sparkPI did not execute correctly.")
 	} else {
 		fmt.Println("PASSED")

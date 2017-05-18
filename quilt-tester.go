@@ -131,7 +131,7 @@ func (t *tester) generateTestSuites(testRoot string) error {
 		}
 		newSuite := testSuite{
 			name: filepath.Base(testSuiteFolder),
-			spec: spec,
+			spec: "./" + spec,
 			test: test,
 		}
 		t.testSuites = append(t.testSuites, &newSuite)

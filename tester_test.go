@@ -49,7 +49,8 @@ deployment.deploy(new Machine({}));`)
 	res, err := fileContents(specPath)
 	exp := `require("spark");
 var deployment = createDeployment({namespace: "replace"});
-deployment.deploy(new Machine({}));; deployment.namespace = "test-namespace";`
+deployment.deploy(new Machine({}));; ` +
+		`require('@quilt/quilt').getDeployment().namespace = "test-namespace";`
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 		return

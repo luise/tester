@@ -1,3 +1,7 @@
+const {Container, Service, publicInternet} = require("@quilt/quilt");
+const fs = require('fs');
+const path = require('path');
+
 // XXX: Docker does not currently support uploading files to containers with a
 // UID other than root. To get around this, we upload our files to a staging
 // directory, and copy them into the Jenkins home directory (as the Jenkins
@@ -37,15 +41,19 @@ exports.New = function(opts) {
 function setupFiles(jenkins, opts) {
     var files = [];
 
-    var rootConfig = new File("config.xml", read("config/jenkins/root.xml"));
+    var rootConfig = new File("config.xml", readRel("config/jenkins/root.xml"));
     files.push(rootConfig);
 
     var goConfig = new File("org.jenkinsci.plugins.golang.GolangBuildWrapper.xml",
-        read("config/jenkins/go.xml"));
+        readRel("config/jenkins/go.xml"));
     files.push(goConfig);
 
+    var nodeConfig = new File("jenkins.plugins.nodejs.tools.NodeJSInstallation.xml",
+        readRel("config/jenkins/node.xml"));
+    files.push(nodeConfig);
+
     var jobConfig = new File("jobs/quilt-tester/config.xml",
-        applyTemplate(read("config/jenkins/job.xml"),
+        applyTemplate(readRel("config/jenkins/job.xml"),
             {slackTeam: opts.slackTeam,
              slackToken: opts.slackToken,
              slackChannel: opts.slackChannel}));
@@ -53,14 +61,14 @@ function setupFiles(jenkins, opts) {
 
     if (opts.passwordHash !== undefined) {
         var adminConfig = new File("users/admin/config.xml",
-            applyTemplate(read("config/jenkins/admin.xml"),
+            applyTemplate(readRel("config/jenkins/admin.xml"),
                 {passwordHash: opts.passwordHash}));
         files.push(adminConfig);
     }
 
     if (opts.jenkinsUrl !== undefined) {
         var locConfig = new File("jenkins.model.JenkinsLocationConfiguration.xml",
-            applyTemplate(read("config/jenkins/location.xml"),
+            applyTemplate(readRel("config/jenkins/location.xml"),
                 {jenkinsUrl: opts.jenkinsUrl}));
         files.push(locConfig);
     }
@@ -90,4 +98,8 @@ function assertRequiredParameters(opts, requiredKeys) {
 function File(path, content) {
     this.path = path;
     this.content = content;
+}
+
+function readRel(file) {
+    return fs.readFileSync(path.join(__dirname, file), {encoding: 'utf8'});
 }

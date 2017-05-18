@@ -93,6 +93,9 @@ tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</co
       <externalDelete></externalDelete>
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
+    <jenkins.plugins.nodejs.NodeJSBuildWrapper plugin="nodejs@1.2.1">
+        <nodeJSInstallationName>node-7.10.0</nodeJSInstallationName>
+    </jenkins.plugins.nodejs.NodeJSBuildWrapper>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.2">
       <goVersion>go-1.7</goVersion>
     </org.jenkinsci.plugins.golang.GolangBuildWrapper>

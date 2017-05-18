@@ -22,10 +22,7 @@ import (
 )
 
 var (
-	quiltPath          = filepath.Join(os.Getenv("WORKSPACE"), ".quilt")
-	testerImport       = "github.com/quilt/tester"
-	infrastructureSpec = filepath.Join(quiltPath, testerImport,
-		"config/infrastructure-runner.js")
+	infrastructureSpec = "./config/infrastructure-runner.js"
 )
 
 // The global logger for this CI run.
@@ -179,12 +176,11 @@ func (t *tester) setup() error {
 	l.infoln("Starting the Quilt daemon.")
 	go runQuiltDaemon()
 
-	// Get our specs
-	os.Setenv(stitch.QuiltPathKey, quiltPath)
-	l.infoln(fmt.Sprintf("Downloading %s into %s", testerImport, quiltPath))
-	_, _, err := downloadSpecs(testerImport)
+	// Get spec dependencies.
+	l.infoln("Installing spec dependencies")
+	_, _, err := npmInstall()
 	if err != nil {
-		l.infoln(fmt.Sprintf("Could not download %s", testerImport))
+		l.infoln("Could not install dependencies")
 		l.errorln(err.Error())
 		return err
 	}
@@ -301,7 +297,7 @@ func (ts *testSuite) run() error {
 }
 
 func waitForContainers(specPath string) error {
-	stc, err := stitch.FromFile(specPath, stitch.NewImportGetter(quiltPath))
+	stc, err := stitch.FromFile(specPath)
 	if err != nil {
 		return err
 	}

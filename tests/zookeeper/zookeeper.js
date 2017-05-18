@@ -1,5 +1,6 @@
-var zookeeper = require("github.com/quilt/zookeeper");
-var infrastructure = require("github.com/quilt/tester/config/infrastructure");
+const {createDeployment} = require("@quilt/quilt");
+var zookeeper = require("@quilt/zookeeper");
+var infrastructure = require("../../config/infrastructure.js")
 
 var deployment = createDeployment();
 deployment.deploy(infrastructure);

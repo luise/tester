@@ -71,10 +71,10 @@ func stop(namespace string) (string, string, error) {
 	return stdout, stderr, util.WaitFor(stopped, 1*time.Second, 2*time.Minute)
 }
 
-// downloadSpecs gets the given import path.
-func downloadSpecs(importPath string) (string, string, error) {
-	cmd := exec.Command("quilt", "get", importPath)
-	return execCmd(cmd, "GET")
+// npmInstall installs the npm dependencies in the current directory.
+func npmInstall() (string, string, error) {
+	cmd := exec.Command("npm", "install", ".")
+	return execCmd(cmd, "NPM-INSTALL")
 }
 
 // runSpec runs the given spec. Note that it does not block on the connection

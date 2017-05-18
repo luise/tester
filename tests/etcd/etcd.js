@@ -1,5 +1,6 @@
-var etcd = require("github.com/quilt/etcd");
-var infrastructure = require("github.com/quilt/tester/config/infrastructure")
+const {createDeployment} = require("@quilt/quilt");
+var etcd = require("@quilt/etcd");
+var infrastructure = require("../../config/infrastructure.js")
 
 var deployment = createDeployment({});
 deployment.deploy(infrastructure);

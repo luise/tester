@@ -2,7 +2,8 @@
 // of all paramters to `tester.New`. It uses a floating IP to automatically
 // configure `jenkinsUrl`.
 
-var tester = require("github.com/quilt/tester/tester");
+const {createDeployment, Machine} = require("@quilt/quilt");
+var tester = require("./tester.js");
 
 var deployment = createDeployment();
 var baseMachine = new Machine({provider: "Amazon"});

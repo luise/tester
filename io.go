@@ -78,7 +78,7 @@ func updateNamespace(specfile string, namespace string) error {
 
 	// Set the namespace of the global deployment to be `namespace`.
 	updatedSpec := specContents +
-		fmt.Sprintf("; deployment.namespace = %q;", namespace)
+		fmt.Sprintf("; require('@quilt/quilt').getDeployment().namespace = %q;", namespace)
 
 	return overwrite(specfile, updatedSpec)
 }

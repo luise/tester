@@ -1,3 +1,5 @@
+const {Machine} = require("@quilt/quilt");
+
 function MachineDeployer(nWorker) {
     this.nWorker = nWorker;
 }

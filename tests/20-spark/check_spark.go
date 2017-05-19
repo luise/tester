@@ -35,15 +35,13 @@ func main() {
 	fmt.Println(string(containersPretty))
 
 	var id string
-	failed := true
 	for _, dbc := range containers {
 		if strings.Join(dbc.Command, " ") == "run master" {
-			id = fmt.Sprint(dbc.StitchID)
-			failed = false
-			println("found id ", id)
+			id = dbc.StitchID
+			break
 		}
 	}
-	if failed {
+	if id == "" {
 		log.Fatal("FAILED, unable to find StitchID of Spark master.")
 	}
 

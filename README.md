@@ -17,8 +17,17 @@ configuration options to be passed in by the caller. An example is included at
 [tester-runner-example.js](tester-runner-example.js).
 
 The required configurations are:
-- `awsAccessKey`: The access key used by test daemon to boot machines.
-- `awsSecretAccessKey`: The secret access key used by test daemon to boot machines.
+- `awsAccessKey`: The access key used by the test daemon to boot machines on
+the Amazon provider.
+- `awsSecretAccessKey`: The secret access key used by the test daemon to boot
+machines on the Amazon provider.
+- `digitalOceanKey`: The secret key used to boot machines on the DigitalOcean
+provider.
+- `gceProjectID`: The ID of the project in which Google machines will be booted.
+- `gcePrivateKey`: The private key of the service account used to boot machines
+on the Google provider.
+- `gceClientEmail`: The email address of the service account used to boot
+machines on the Google provider.
 - `testingNamespace`: The namespace used by the test daemon.
 - `slackChannel`: The Slack channel where build results will be posted.
 - `slackTeam`: The Slack team in which `slackChannel` is located.

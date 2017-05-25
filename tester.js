@@ -9,7 +9,12 @@ const path = require('path');
 var jenkinsStagingDir = "/tmp/files/"
 
 exports.New = function(opts) {
-    assertRequiredParameters(opts, ["awsAccessKey", "awsSecretAccessKey", "testingNamespace", "slackTeam", "slackChannel", "slackToken"]);
+    assertRequiredParameters(opts, [
+        "awsAccessKey", "awsSecretAccessKey",
+        "digitalOceanKey",
+        "gceProjectID", "gcePrivateKey", "gceClientEmail",
+        "testingNamespace",
+        "slackTeam", "slackChannel", "slackToken"]);
 
     var container = new Container("quilt/tester",
         ["/bin/bash", "-c",
@@ -40,6 +45,15 @@ exports.New = function(opts) {
 
 function setupFiles(jenkins, opts) {
     var files = [];
+
+    files.push(new File(".digitalocean/key", opts.digitalOceanKey));
+
+    var gceConfig = new File(".gce/quilt.json",
+        applyTemplate(readRel("config/gce.json.tmpl"),
+            {gceProjectID: opts.gceProjectID,
+             gcePrivateKey: opts.gcePrivateKey,
+             gceClientEmail: opts.gceClientEmail}));
+    files.push(gceConfig);
 
     var rootConfig = new File("config.xml", readRel("config/jenkins/root.xml"));
     files.push(rootConfig);

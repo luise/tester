@@ -9,10 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
-
 	"github.com/quilt/quilt/api"
 	"github.com/quilt/quilt/api/client"
 	"github.com/quilt/quilt/db"
@@ -47,8 +43,8 @@ func runSpecUntilConnected(spec string) (string, string, error) {
 	return stdout, stderr, err
 }
 
-// stop stops the given namespace, and blocks until there are no more machines
-// in the namespace, or 2 minutes have passed.
+// stop stops the given namespace, and waits 2 minutes for the command
+// to take effect.
 func stop(namespace string) (string, string, error) {
 	cmd := exec.Command("quilt", "stop", namespace)
 
@@ -57,18 +53,8 @@ func stop(namespace string) (string, string, error) {
 		return stdout, stderr, err
 	}
 
-	stopped := func() bool {
-		instances, err := getAWSInstances(namespace)
-		if err != nil {
-			log.testerLogger.println(
-				fmt.Sprintf("Unable to get AWS instances: %s",
-					err.Error()))
-			return false
-		}
-		return len(instances) == 0
-	}
-
-	return stdout, stderr, util.WaitFor(stopped, 1*time.Second, 2*time.Minute)
+	time.Sleep(2 * time.Minute)
+	return stdout, stderr, nil
 }
 
 // npmInstall installs the npm dependencies in the current directory.
@@ -177,45 +163,6 @@ func queryMachines() ([]db.Machine, error) {
 	return c.QueryMachines()
 }
 
-func getAWSInstances(namespace string) ([]*string, error) {
-	// Find all of the instances under the namespace
-	svc := ec2.New(session.New(), &aws.Config{Region: aws.String("us-west-1")})
-	params := &ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			{Name: aws.String("network-interface.group-name"),
-				Values: []*string{aws.String(namespace)}},
-		},
-	}
-	resp, err := svc.DescribeInstances(params)
-	if err != nil {
-		return []*string{}, err
-	}
-
-	// Build the list of InstanceIds
-	ids := []*string{}
-	for _, res := range resp.Reservations {
-		for _, inst := range res.Instances {
-			ids = append(ids, inst.InstanceId)
-		}
-	}
-	return ids, nil
-}
-
-func killAWS(namespace string) error {
-	ids, err := getAWSInstances(namespace)
-	if err != nil || len(ids) == 0 {
-		return err
-	}
-
-	toDelete := &ec2.TerminateInstancesInput{
-		InstanceIds: ids,
-	}
-
-	svc := ec2.New(session.New(), &aws.Config{Region: aws.String("us-west-1")})
-	req, _ := svc.TerminateInstancesRequest(toDelete)
-	return req.Send()
-}
-
 func cleanupMachines(namespace string) {
 	l := log.testerLogger
 
@@ -223,11 +170,6 @@ func cleanupMachines(namespace string) {
 	if _, _, err := stop(namespace); err != nil {
 		l.infoln("`quilt stop` errored.")
 		l.errorln(err.Error())
-		l.infoln("Now attempting to use killAWS.")
-		if err := killAWS(namespace); err != nil {
-			l.infoln("killAWS errored.")
-			l.errorln(err.Error())
-		}
 	}
 	l.infoln("Done cleaning up.")
 }

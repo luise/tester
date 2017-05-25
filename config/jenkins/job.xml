@@ -25,26 +25,6 @@
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.1.0">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/quilt/quilt</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="list"/>
-    <extensions>
-      <hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-        <relativeTargetDir>gohome/src/github.com/quilt/quilt</relativeTargetDir>
-      </hudson.plugins.git.extensions.impl.RelativeTargetDirectory>
-    </extensions>
-  </scm>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
@@ -60,10 +40,13 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>export GOPATH=${WORKSPACE}/gohome
-export PATH=${GOPATH}/bin:${PATH}
+      <command>mkdir ${WORKSPACE}/bin
+curl -sL -o ${WORKSPACE}/bin/quilt https://github.com/quilt/quilt/releases/download/dev/quilt_linux
+chmod 755 ${WORKSPACE}/bin/quilt
 
-go install -v github.com/quilt/quilt
+export GOPATH=${WORKSPACE}/gohome
+export PATH=${GOPATH}/bin:${WORKSPACE}/bin:${PATH}
+
 go get -v github.com/quilt/tester
 
 cd $GOPATH/src/github.com/quilt/tester

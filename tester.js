@@ -13,7 +13,7 @@ exports.New = function(opts) {
 
     var container = new Container("quilt/tester",
         ["/bin/bash", "-c",
-            "cp -r " + jenkinsStagingDir + "* /var/jenkins_home;" +
+            "cp -r " + jenkinsStagingDir + ". /var/jenkins_home;" +
             "/bin/tini -s -- /usr/local/bin/jenkins.sh"]);
     container.setEnv("AWS_ACCESS_KEY", opts.awsAccessKey);
     container.setEnv("AWS_SECRET_ACCESS_KEY", opts.awsSecretAccessKey);

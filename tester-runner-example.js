@@ -17,6 +17,10 @@ deployment.deploy(worker);
 deployment.deploy(tester.New({
     awsAccessKey: "accessKey",
     awsSecretAccessKey: "secret",
+    gceProjectID: "projectID",
+    gcePrivateKey: "privateKey",
+    gceClientEmail: "email",
+    digitalOceanKey: "key",
     testingNamespace: "quilt-tester",
     slackTeam: "quilt-dev",
     slackChannel: "#testing",

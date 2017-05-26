@@ -39,7 +39,7 @@
       <spec></spec>
       <parameterizedSpecification>0 0-23/3 * * * %PROVIDER=Amazon;SIZE=m3.medium
 0 1-23/3 * * * %PROVIDER=Google;SIZE=n1-standard-1
-0 2-23/3 * * * %PROVIDER=DigitalOcean;SIZE=1gb</parameterizedSpecification>
+0 2-23/3 * * * %PROVIDER=DigitalOcean;SIZE=2gb</parameterizedSpecification>
     </org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>

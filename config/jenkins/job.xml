@@ -22,6 +22,11 @@
           <description>The machine size to use for the test run.</description>
           <defaultValue></defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>QUILT_VERSION</name>
+          <description>The Quilt release to test.</description>
+          <defaultValue>dev</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -41,7 +46,7 @@
   <builders>
     <hudson.tasks.Shell>
       <command>mkdir ${WORKSPACE}/bin
-curl -sL -o ${WORKSPACE}/bin/quilt https://github.com/quilt/quilt/releases/download/dev/quilt_linux
+curl -sL -o ${WORKSPACE}/bin/quilt https://github.com/quilt/quilt/releases/download/${QUILT_VERSION}/quilt_linux
 chmod 755 ${WORKSPACE}/bin/quilt
 
 export GOPATH=${WORKSPACE}/gohome

@@ -58,6 +58,9 @@ function setupFiles(jenkins, opts) {
     var rootConfig = new File("config.xml", readRel("config/jenkins/root.xml"));
     files.push(rootConfig);
 
+    var scriptConfig = new File("scriptApproval.xml", readRel("config/jenkins/scriptApproval.xml"));
+    files.push(scriptConfig);
+
     var goConfig = new File("org.jenkinsci.plugins.golang.GolangBuildWrapper.xml",
         readRel("config/jenkins/go.xml"));
     files.push(goConfig);

@@ -68,6 +68,15 @@ tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</co
       <defaultExcludes>true</defaultExcludes>
       <caseSensitive>true</caseSensitive>
     </hudson.tasks.ArtifactArchiver>
+    <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@2.3.1">
+      <script plugin="script-security@1.27">
+        <script>manager.addShortText(&quot;${manager.build.buildVariables.get(&apos;QUILT_VERSION&apos;)}&quot;)
+manager.addShortText(&quot;${manager.build.buildVariables.get(&apos;PROVIDER&apos;)}&quot;)</script>
+        <sandbox>false</sandbox>
+      </script>
+      <behavior>0</behavior>
+      <runForMatrixParent>false</runForMatrixParent>
+    </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
     <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.20">
       <testResults>report.xml</testResults>
       <keepLongStdio>true</keepLongStdio>

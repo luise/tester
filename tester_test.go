@@ -37,16 +37,16 @@ func TestCmdExec(t *testing.T) {
 func TestUpdateNamespace(t *testing.T) {
 	appFs = afero.NewMemMapFs()
 
-	specPath := "/test.spec"
-	err := overwrite(specPath, `require("spark");
+	blueprintPath := "/test.blueprint"
+	err := overwrite(blueprintPath, `require("spark");
 var deployment = createDeployment({namespace: "replace"});
 deployment.deploy(new Machine({}));`)
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
 	}
-	updateNamespace(specPath, "test-namespace")
+	updateNamespace(blueprintPath, "test-namespace")
 
-	res, err := fileContents(specPath)
+	res, err := fileContents(blueprintPath)
 	exp := `require("spark");
 var deployment = createDeployment({namespace: "replace"});
 deployment.deploy(new Machine({}));; ` +

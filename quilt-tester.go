@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	infrastructureSpec = "./config/infrastructure-runner.js"
+	infrastructureBlueprint = "./config/infrastructure-runner.js"
 )
 
 // The global logger for this CI run.
@@ -109,15 +109,15 @@ func (t *tester) generateTestSuites(testRoot string) error {
 			return err
 		}
 
-		var spec, test string
+		var blueprint, test string
 		for _, file := range files {
 			path := filepath.Join(testSuiteFolder, file.Name())
 			switch {
 			case strings.HasSuffix(file.Name(), ".js"):
-				spec = path
-				if err := updateNamespace(spec, t.namespace); err != nil {
+				blueprint = path
+				if err := updateNamespace(blueprint, t.namespace); err != nil {
 					l.infoln(fmt.Sprintf(
-						"Error updating namespace for %s.", spec))
+						"Error updating namespace for %s.", blueprint))
 					l.errorln(err.Error())
 					return err
 				}
@@ -128,7 +128,7 @@ func (t *tester) generateTestSuites(testRoot string) error {
 		}
 		newSuite := testSuite{
 			name: filepath.Base(testSuiteFolder),
-			spec: "./" + spec,
+			blueprint: "./" + blueprint,
 			test: test,
 		}
 		t.testSuites = append(t.testSuites, &newSuite)
@@ -176,8 +176,8 @@ func (t *tester) setup() error {
 	l.infoln("Starting the Quilt daemon.")
 	go runQuiltDaemon()
 
-	// Get spec dependencies.
-	l.infoln("Installing spec dependencies")
+	// Get blueprint dependencies.
+	l.infoln("Installing blueprint dependencies")
 	_, _, err := npmInstall()
 	if err != nil {
 		l.infoln("Could not install dependencies")
@@ -196,18 +196,18 @@ func (t *tester) setup() error {
 	// Setup infrastructure.
 	l.infoln("Booting the machines the test suites will run on, and waiting " +
 		"for them to connect back.")
-	l.infoln("Begin " + infrastructureSpec)
-	if err := updateNamespace(infrastructureSpec, t.namespace); err != nil {
+	l.infoln("Begin " + infrastructureBlueprint)
+	if err := updateNamespace(infrastructureBlueprint, t.namespace); err != nil {
 		l.infoln(fmt.Sprintf("Error updating namespace for %s.",
-			infrastructureSpec))
+			infrastructureBlueprint))
 		l.errorln(err.Error())
 		return err
 	}
-	contents, _ := fileContents(infrastructureSpec)
+	contents, _ := fileContents(infrastructureBlueprint)
 	l.println(contents)
-	l.infoln("End " + infrastructureSpec)
+	l.infoln("End " + infrastructureBlueprint)
 
-	_, _, err = runSpecUntilConnected(infrastructureSpec)
+	_, _, err = runBlueprintUntilConnected(infrastructureBlueprint)
 	if err != nil {
 		l.infoln("Failed to setup infrastructure")
 		l.errorln(err.Error())
@@ -233,9 +233,9 @@ func (t tester) runTestSuites() error {
 }
 
 type testSuite struct {
-	name string
-	spec string
-	test string
+	name      string
+	blueprint string
+	test      string
 
 	output      string
 	passed      bool
@@ -261,15 +261,15 @@ func (ts *testSuite) run() error {
 
 	l.infoln(fmt.Sprintf("Test Suite: %s", ts.name))
 	l.infoln("Start " + ts.name + ".js")
-	contents, _ := fileContents(ts.spec)
+	contents, _ := fileContents(ts.blueprint)
 	l.println(contents)
 	l.infoln("End " + ts.name + ".js")
 	defer l.infoln(fmt.Sprintf("Finished Test Suite: %s", ts.name))
 
-	runSpec(ts.spec)
+	runBlueprint(ts.blueprint)
 
 	l.infoln("Waiting for containers to start up")
-	if err := waitForContainers(ts.spec); err != nil {
+	if err := waitForContainers(ts.blueprint); err != nil {
 		l.println(".. Containers never started: " + err.Error())
 		ts.passed = false
 		return err
@@ -296,8 +296,8 @@ func (ts *testSuite) run() error {
 	return err
 }
 
-func waitForContainers(specPath string) error {
-	stc, err := stitch.FromFile(specPath)
+func waitForContainers(blueprintPath string) error {
+	stc, err := stitch.FromFile(blueprintPath)
 	if err != nil {
 		return err
 	}

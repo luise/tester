@@ -13,7 +13,7 @@ RUN /usr/local/bin/install-plugins.sh golang ws-cleanup timestamper slack \
     groovy-postbuild
 
 
-# XXX: We unset the Entrypoint so that specs can run arbitrary commands (such
+# XXX: We unset the Entrypoint so that blueprints can run arbitrary commands (such
 # as `bash`) to initialize the container. This is necessary to properly write
 # files into JENKINS_HOME.
 Entrypoint []

@@ -69,16 +69,16 @@ func fileContents(file string) (string, error) {
 	return string(contents), nil
 }
 
-// Update the given spec to have the given namespace.
-func updateNamespace(specfile string, namespace string) error {
-	specContents, err := fileContents(specfile)
+// Update the given blueprint to have the given namespace.
+func updateNamespace(blueprintFile string, namespace string) error {
+	blueprintContents, err := fileContents(blueprintFile)
 	if err != nil {
 		return err
 	}
 
 	// Set the namespace of the global deployment to be `namespace`.
-	updatedSpec := specContents +
+	updatedBlueprint := blueprintContents +
 		fmt.Sprintf("; require('@quilt/quilt').getDeployment().namespace = %q;", namespace)
 
-	return overwrite(specfile, updatedSpec)
+	return overwrite(blueprintFile, updatedBlueprint)
 }

@@ -15,10 +15,10 @@ import (
 	"github.com/quilt/quilt/util"
 )
 
-// runSpecUntilConnected runs the given spec, and blocks until either all
+// runBlueprintUntilConnected runs the given blueprint, and blocks until either all
 // machines have connected back to the daemon, or 500 seconds have passed.
-func runSpecUntilConnected(spec string) (string, string, error) {
-	cmd := exec.Command("quilt", "run", "-f", spec)
+func runBlueprintUntilConnected(blueprint string) (string, string, error) {
+	cmd := exec.Command("quilt", "run", "-f", blueprint)
 	stdout, stderr, err := execCmd(cmd, "INFRA")
 	if err != nil {
 		return stdout, stderr, err
@@ -63,10 +63,10 @@ func npmInstall() (string, string, error) {
 	return execCmd(cmd, "NPM-INSTALL")
 }
 
-// runSpec runs the given spec. Note that it does not block on the connection
+// runBlueprint runs the given blueprint. Note that it does not block on the connection
 // status of the machines.
-func runSpec(spec string) (string, string, error) {
-	cmd := exec.Command("quilt", "run", "-f", spec)
+func runBlueprint(blueprint string) (string, string, error) {
+	cmd := exec.Command("quilt", "run", "-f", blueprint)
 	return execCmd(cmd, "RUN")
 }
 

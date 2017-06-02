@@ -1,6 +1,6 @@
 # Quilt CI
 
-This repository contains a Quilt spec for a Jenkins deployment that tests
+This repository contains a Quilt blueprint for a Jenkins deployment that tests
 [Quilt](github.com/quilt/quilt).
 
 It also contains a custom Docker image because we require some build tools and

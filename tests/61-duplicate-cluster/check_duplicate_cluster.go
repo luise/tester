@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -10,6 +11,8 @@ import (
 	"github.com/quilt/quilt/api"
 	"github.com/quilt/quilt/api/client/getter"
 )
+
+var connectionRegex = regexp.MustCompile(`Registering worker (\d+\.\d+\.\d+\.\d+:\d+)`)
 
 func main() {
 	clientGetter := getter.New()
@@ -63,8 +66,11 @@ func main() {
 
 		// Each cluster's workers should connect only to its own master.
 		logsStr := string(logs)
-		workerCount := strings.Count(logsStr, "Registering worker")
-		if workerCount != totalWorkers/2 {
+		workerSet := map[string]struct{}{}
+		for _, wkMatch := range connectionRegex.FindAllStringSubmatch(logsStr, -1) {
+			workerSet[wkMatch[1]] = struct{}{}
+		}
+		if workerCount := len(workerSet); workerCount != totalWorkers/2 {
 			failed = true
 			log.WithFields(log.Fields{
 				"master":                master,

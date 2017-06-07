@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+
 	"github.com/quilt/quilt/api"
 	"github.com/quilt/quilt/api/client/getter"
 )

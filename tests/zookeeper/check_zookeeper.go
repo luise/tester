@@ -8,9 +8,9 @@ import (
 	"github.com/quilt/quilt/api"
 	"github.com/quilt/quilt/api/client/getter"
 	"github.com/quilt/quilt/db"
-	"github.com/satori/go.uuid"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/satori/go.uuid"
 )
 
 func main() {

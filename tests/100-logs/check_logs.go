@@ -43,9 +43,12 @@ func main() {
 
 		// "goroutine 0" is the main goroutine, and is thus always printed in
 		// stacktraces.
+		// The trailing open bracket is necessary to filter out false positives
+		// in the log output. For example, as part of logging DNS requests, the
+		// status string NOERROR is printed.
 		if strings.Contains(outputStr, "goroutine 0") ||
-			strings.Contains(outputStr, "ERROR") ||
-			strings.Contains(outputStr, "WARN") {
+			strings.Contains(outputStr, "ERROR [") ||
+			strings.Contains(outputStr, "WARN [") {
 			failed = true
 		}
 	}

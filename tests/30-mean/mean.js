@@ -18,8 +18,8 @@ var app = new Node({
 });
 var haproxy = new HaProxy(3, app.services());
 
-app.allowFrom(mongo, mongo.port);
-mongo.allowFrom(app, mongo.port);
+mongo.connect(mongo.port, app);
+app.connect(mongo.port, mongo);
 haproxy.public();
 
 deployment.deploy(app);

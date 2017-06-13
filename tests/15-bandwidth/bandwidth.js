@@ -16,10 +16,10 @@ exclusive.place(new LabelRule(true, exclusive));
 
 var extra = new Service("iperfExtra", [c]);
 
-exclusive.connect(5201, exclusive);
-extra.connect(5201, exclusive);
-exclusive.connect(5201, extra);
-extra.connect(5201, exclusive);
+exclusive.allowFrom(exclusive, 5201);
+exclusive.allowFrom(extra, 5201);
+extra.allowFrom(exclusive, 5201);
+exclusive.allowFrom(extra, 5201);
 
 deployment.deploy(exclusive);
 deployment.deploy(extra);

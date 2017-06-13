@@ -9,10 +9,10 @@ var red = new Service("red", c.replicate(5));
 var blue = new Service("blue", c.replicate(5));
 var yellow = new Service("yellow", c.replicate(5));
 
-red.connect(80, blue);
-blue.connect(80, red);
-red.connect(80, yellow);
-blue.connect(80, yellow);
+blue.allowFrom(red, 80);
+red.allowFrom(blue, 80);
+yellow.allowFrom(red, 80);
+yellow.allowFrom(blue, 80);
 
 deployment.deploy(red);
 deployment.deploy(blue);

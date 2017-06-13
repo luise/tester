@@ -8,7 +8,7 @@ var connected = new Service("connected",
     new Container("alpine", ["tail", "-f", "/dev/null"])
         .replicate(infrastructure.nWorker*2)
 );
-connected.connect(80, publicInternet);
+publicInternet.allowFrom(connected, 80);
 
 var notConnected = new Service("not-connected",
     new Container("alpine", ["tail", "-f", "/dev/null"])

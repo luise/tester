@@ -25,13 +25,14 @@ const anyIPAllowed = "0.0.0.0"
 var externalHostnames = []string{"google.com", "facebook.com", "en.wikipedia.org"}
 
 type testFailure struct {
-	target string
-	err    error
+	target  string
+	err     error
+	cmdTime commandTime
 }
 
 func (tf testFailure) String() string {
 	if tf.err != nil {
-		return fmt.Sprintf("%s: %s", tf.target, tf.err)
+		return fmt.Sprintf("(%s) %s: %s", tf.cmdTime, tf.target, tf.err)
 	}
 	return tf.target
 }
@@ -41,6 +42,16 @@ type testResult struct {
 	pingUnauthorized []testFailure
 	pingUnreachable  []testFailure
 	dnsIncorrect     []testFailure
+}
+
+type commandTime struct {
+	start, end time.Time
+}
+
+func (ct commandTime) String() string {
+	// Just show the hour, minute, and second.
+	timeFmt := "15:04:05"
+	return ct.start.Format(timeFmt) + " - " + ct.end.Format(timeFmt)
 }
 
 func main() {
@@ -213,6 +224,7 @@ type pingResult struct {
 	target    string
 	reachable bool
 	err       error
+	cmdTime   commandTime
 }
 
 // We have to limit our parallelization because each `quilt exec` creates a new SSH login
@@ -231,11 +243,13 @@ func (tester networkTester) pingAll(container db.Container) []pingResult {
 		go func() {
 			defer wg.Done()
 			for ip := range pingRequests {
+				startTime := time.Now()
 				_, err := ping(container.StitchID, ip)
 				pingResultsChan <- pingResult{
 					target:    ip,
 					reachable: err == nil,
 					err:       err,
+					cmdTime:   commandTime{startTime, time.Now()},
 				}
 			}
 		}()
@@ -262,6 +276,7 @@ type lookupResult struct {
 	hostname string
 	ip       string
 	err      error
+	cmdTime  commandTime
 }
 
 // Resolve all hostnames on the container with the given StitchID. Parallelize
@@ -277,8 +292,10 @@ func (tester networkTester) lookupAll(container db.Container) []lookupResult {
 		go func() {
 			defer wg.Done()
 			for hostname := range lookupRequests {
+				startTime := time.Now()
 				ip, err := lookup(container.StitchID, hostname)
-				lookupResultsChan <- lookupResult{hostname, ip, err}
+				lookupResultsChan <- lookupResult{hostname, ip, err,
+					commandTime{startTime, time.Now()}}
 			}
 		}()
 	}
@@ -329,7 +346,7 @@ func (tester networkTester) test(container db.Container) testResult {
 	var pingUnreachable, pingUnauthorized []testFailure
 	for _, badIntf := range failures {
 		bad := badIntf.(pingResult)
-		failure := testFailure{bad.target, bad.err}
+		failure := testFailure{bad.target, bad.err, bad.cmdTime}
 		if bad.reachable {
 			pingUnauthorized = append(pingUnauthorized, failure)
 		} else {
@@ -350,7 +367,7 @@ func (tester networkTester) test(container db.Container) testResult {
 		if err == nil {
 			err = fmt.Errorf("%s => %s (expected %s)", l.hostname, l.ip, expIP)
 		}
-		dnsIncorrect = append(dnsIncorrect, testFailure{l.hostname, err})
+		dnsIncorrect = append(dnsIncorrect, testFailure{l.hostname, err, l.cmdTime})
 	}
 
 	return testResult{

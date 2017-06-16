@@ -68,29 +68,34 @@ func main() {
 	}
 
 	var failed bool
-	for _, res := range runTests(tester, containers) {
-		fmt.Println(res.container)
-		if len(res.pingUnauthorized) != 0 {
-			failed = true
-			fmt.Println(".. FAILED, could ping unauthorized containers")
-			for _, unauthorized := range res.pingUnauthorized {
-				fmt.Printf(".... %s\n", unauthorized)
+	// Run the network test twice to see if failed tests persist.
+	for i := 0; i < 2; i++ {
+		fmt.Printf("Starting run %d:\n", i+1)
+		for _, res := range runTests(tester, containers) {
+			fmt.Println(res.container)
+			if len(res.pingUnauthorized) != 0 {
+				failed = true
+				fmt.Println(".. FAILED, could ping unauthorized containers")
+				for _, unauthorized := range res.pingUnauthorized {
+					fmt.Printf(".... %s\n", unauthorized)
+				}
+			}
+			if len(res.pingUnreachable) != 0 {
+				failed = true
+				fmt.Println(".. FAILED, couldn't ping authorized containers")
+				for _, unreachable := range res.pingUnreachable {
+					fmt.Printf(".... %s\n", unreachable)
+				}
+			}
+			if len(res.dnsIncorrect) != 0 {
+				failed = true
+				fmt.Println(".. FAILED, hostnames resolved incorrectly")
+				for _, incorrect := range res.dnsIncorrect {
+					fmt.Printf(".... %s\n", incorrect)
+				}
 			}
 		}
-		if len(res.pingUnreachable) != 0 {
-			failed = true
-			fmt.Println(".. FAILED, couldn't ping authorized containers")
-			for _, unreachable := range res.pingUnreachable {
-				fmt.Printf(".... %s\n", unreachable)
-			}
-		}
-		if len(res.dnsIncorrect) != 0 {
-			failed = true
-			fmt.Println(".. FAILED, hostnames resolved incorrectly")
-			for _, incorrect := range res.dnsIncorrect {
-				fmt.Printf(".... %s\n", incorrect)
-			}
-		}
+		fmt.Println()
 	}
 
 	if !failed {

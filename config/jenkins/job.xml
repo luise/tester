@@ -52,11 +52,16 @@ chmod 755 ${WORKSPACE}/bin/quilt
 export GOPATH=${WORKSPACE}/gohome
 export PATH=${GOPATH}/bin:${WORKSPACE}/bin:${PATH}
 
-go get -v github.com/quilt/tester
+srcPath=$GOPATH/src/github.com/quilt/quilt
+mkdir -p ${srcPath}
+curl -sL https://github.com/quilt/quilt/archive/${QUILT_VERSION}.tar.gz | \
+  tar xz --strip-components=1 -C ${srcPath}
 
-cd $GOPATH/src/github.com/quilt/tester
+cd ${srcPath}/quilt-tester
+go build .
 make tests
-tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</command>
+
+./quilt-tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>

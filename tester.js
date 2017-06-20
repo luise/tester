@@ -29,16 +29,16 @@ exports.New = function(opts) {
     var jenkins = new Service("jenkins", [container]);
 
     // Allow inbound connections to the Jenkins web UI.
-    publicInternet.connect(8080, jenkins);
+    jenkins.allowFrom(publicInternet, 8080);
 
     // The tests talk to the deployed machines on various ports. We allow them here.
-    jenkins.connect(22, publicInternet); // Required by `quilt ssh`.
-    jenkins.connect(80, publicInternet); // Required by network tests.
-    jenkins.connect(443, publicInternet); // Required by network tests.
-    jenkins.connect(8000, publicInternet); // Required by network tests.
-    jenkins.connect(9200, publicInternet); // Required by the elasticsearch test.
-    jenkins.connect(9000, publicInternet); // Required by the Quilt daemon for API communication.
-    jenkins.connect(9999, publicInternet); // Required by the Quilt daemon for minion communcation.
+    publicInternet.allowFrom(jenkins, 22); // Required by `quilt ssh`.
+    publicInternet.allowFrom(jenkins, 80); // Required by network tests.
+    publicInternet.allowFrom(jenkins, 443); // Required by network tests.
+    publicInternet.allowFrom(jenkins, 8000); // Required by network tests.
+    publicInternet.allowFrom(jenkins, 9200); // Required by the elasticsearch test.
+    publicInternet.allowFrom(jenkins, 9000); // Required by the Quilt daemon for API communication.
+    publicInternet.allowFrom(jenkins, 9999); // Required by the Quilt daemon for minion communcation.
 
     return jenkins;
 }

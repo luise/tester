@@ -40,6 +40,9 @@ exports.New = function(opts) {
     publicInternet.allowFrom(jenkins, 9000); // Required by the Quilt daemon for API communication.
     publicInternet.allowFrom(jenkins, 9999); // Required by the Quilt daemon for minion communcation.
 
+    // Allow outbound connections to Git servers. Required by `npm install`.
+    publicInternet.allowFrom(jenkins, 9418);
+
     return jenkins;
 }
 

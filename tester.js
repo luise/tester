@@ -79,6 +79,13 @@ function setupFiles(jenkins, opts) {
              slackChannel: opts.slackChannel}));
     files.push(quiltTesterConfig);
 
+    var checkDepsConfig = new File("jobs/check-dependencies/config.xml",
+        applyTemplate(readRel("config/jenkins/check-dependencies.xml"),
+            {slackTeam: opts.slackTeam,
+             slackToken: opts.slackToken,
+             slackChannel: opts.slackChannel}));
+    files.push(checkDepsConfig);
+
     if (opts.passwordHash !== undefined) {
         var adminConfig = new File("users/admin/config.xml",
             applyTemplate(readRel("config/jenkins/admin.xml"),

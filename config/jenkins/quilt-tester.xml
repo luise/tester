@@ -27,6 +27,11 @@
           <description>The Quilt release to test.</description>
           <defaultValue>dev</defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>USE_TLS</name>
+          <description>Run Quilt with TLS enabled.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -37,7 +42,7 @@
   <triggers>
     <org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger plugin="parameterized-scheduler@0.4">
       <spec></spec>
-      <parameterizedSpecification>0 0-23/3 * * * %PROVIDER=Amazon;SIZE=m3.medium
+      <parameterizedSpecification>0 0-23/3 * * * %PROVIDER=Amazon;SIZE=m3.medium;USE_TLS=true
 0 1-23/3 * * * %PROVIDER=Google;SIZE=n1-standard-1
 0 2-23/3 * * * %PROVIDER=DigitalOcean;SIZE=2gb</parameterizedSpecification>
     </org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger>
@@ -60,6 +65,11 @@ curl -sL https://github.com/quilt/quilt/archive/${QUILT_VERSION}.tar.gz | \
 cd ${srcPath}/quilt-tester
 go build .
 make tests
+
+if [ "${USE_TLS}" = "true" ] ; then
+  export TLS_DIR="${WORKSPACE}/tls"
+  quilt -v setup-tls "${TLS_DIR}"
+fi
 
 ./quilt-tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</command>
     </hudson.tasks.Shell>

@@ -3,7 +3,7 @@
 // configure `jenkinsUrl`.
 
 const { createDeployment, Machine } = require('@quilt/quilt');
-const tester = require('./tester.js');
+const jenkins = require('./jenkins.js');
 
 const deployment = createDeployment();
 const baseMachine = new Machine({ provider: 'Amazon' });
@@ -14,7 +14,7 @@ const worker = baseMachine.asWorker();
 worker.floatingIp = '8.8.8.8';
 deployment.deploy(worker);
 
-deployment.deploy(tester.New({
+deployment.deploy(jenkins.New({
   awsAccessKey: 'accessKey',
   awsSecretAccessKey: 'secret',
   gceProjectID: 'projectID',

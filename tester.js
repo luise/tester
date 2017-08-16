@@ -1,4 +1,4 @@
-const { Container, Service, publicInternet } = require('@quilt/quilt');
+const { Container, publicInternet } = require('@quilt/quilt');
 const fs = require('fs');
 const path = require('path');
 
@@ -100,21 +100,20 @@ exports.New = function New(opts) {
     'testingNamespace',
     'slackTeam', 'slackChannel', 'slackToken']);
 
-  const container = new Container('quilt/tester',
-    ['/bin/bash', '-c',
+  const jenkins = new Container('jenkins', 'quilt/tester', {
+    command: ['/bin/bash', '-c',
       `cp -r ${jenkinsStagingDir}. /var/jenkins_home;` +
-            '/bin/tini -s -- /usr/local/bin/jenkins.sh']);
-  container.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
-  container.setEnv('AWS_SECRET_ACCESS_KEY', opts.awsSecretAccessKey);
-  container.setEnv('TESTING_NAMESPACE', opts.testingNamespace);
-  container.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
+            '/bin/tini -s -- /usr/local/bin/jenkins.sh'],
+  });
+  jenkins.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
+  jenkins.setEnv('AWS_SECRET_ACCESS_KEY', opts.awsSecretAccessKey);
+  jenkins.setEnv('TESTING_NAMESPACE', opts.testingNamespace);
+  jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
 
   const files = setupFiles(opts);
   files.forEach((f) => {
-    container.filepathToContent[jenkinsStagingDir + f.path] = f.content;
+    jenkins.filepathToContent[jenkinsStagingDir + f.path] = f.content;
   });
-
-  const jenkins = new Service('jenkins', [container]);
 
   // Allow inbound connections to the Jenkins web UI.
   jenkins.allowFrom(publicInternet, 8080);

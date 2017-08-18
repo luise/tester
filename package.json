@@ -4,7 +4,8 @@
   "main": "./tester.js",
   "license": "MIT",
   "dependencies": {
-    "@quilt/quilt": "quilt/quilt"
+    "@quilt/quilt": "quilt/quilt",
+    "sshpk": "^1.13.1"
   },
   "devDependencies": {
     "eslint": "^4.4.1",

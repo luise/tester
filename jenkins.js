@@ -8,6 +8,19 @@ const path = require('path');
 // user) before starting Jenkins.
 const jenkinsStagingDir = '/tmp/files/';
 
+const releaserKeyPath = '~/jobs/quilt-tester/releaserKey';
+
+/**
+ * trimPrefix removes `prefix` from `str` if it begins with `prefix`.
+ *
+ * @param {string} str - The string from which `prefix` should be removed.
+ * @param {string} prefix - The string to remove.
+ * @returns {string} - The trimmed string.
+ */
+function trimPrefix(str, prefix) {
+  return str.replace(new RegExp(`^${prefix}`), '');
+}
+
 // applyTemplate replaces the keys defined by `vars` with their corresponding
 // values in `template`. A variable is denoted in the template using {{key}}.
 function applyTemplate(templateArg, vars) {
@@ -35,7 +48,7 @@ function readRel(file) {
   return fs.readFileSync(path.join(__dirname, file), { encoding: 'utf8' });
 }
 
-function setupFiles(opts) {
+function setupFiles(opts, scp) {
   const files = [];
 
   files.push(new File('.digitalocean/key', opts.digitalOceanKey));
@@ -61,12 +74,24 @@ function setupFiles(opts) {
     readRel('config/jenkins/node.xml'));
   files.push(nodeConfig);
 
+  const knownHostsPath = '~/jobs/quilt-tester/known_hosts';
   const quiltTesterConfig = new File('jobs/quilt-tester/config.xml',
     applyTemplate(readRel('config/jenkins/quilt-tester.xml'),
       { slackTeam: opts.slackTeam,
         slackToken: opts.slackToken,
-        slackChannel: opts.slackChannel }));
+        slackChannel: opts.slackChannel,
+        // The ${QUILT_VERSION} string is not meant to be evaluated in the Javascript.
+        // It should get expanded by Jenkins when the build runs.
+        // eslint-disable-next-line no-template-curly-in-string
+        copyCommand: scp.getCommand('${QUILT_VERSION}.tar.gz', 'release.tar.gz', {
+          identityFile: releaserKeyPath,
+          knownHostsFile: knownHostsPath,
+        }),
+      }));
   files.push(quiltTesterConfig);
+  files.push(new File(trimPrefix(releaserKeyPath, '~/'), scp.userKeyPair.priv));
+  files.push(new File(trimPrefix(knownHostsPath, '~/'),
+    `${scp.getHostname()} ${scp.hostKeyPair.pub}`));
 
   const checkDepsConfig = new File('jobs/check-dependencies/config.xml',
     applyTemplate(readRel('config/jenkins/check-dependencies.xml'),
@@ -92,7 +117,7 @@ function setupFiles(opts) {
   return files;
 }
 
-exports.New = function New(opts) {
+exports.New = function New(opts, scp) {
   assertRequiredParameters(opts, [
     'awsAccessKey', 'awsSecretAccessKey',
     'digitalOceanKey',
@@ -103,6 +128,7 @@ exports.New = function New(opts) {
   const jenkins = new Container('jenkins', 'quilt/tester', {
     command: ['/bin/bash', '-c',
       `cp -r ${jenkinsStagingDir}. /var/jenkins_home;` +
+      `chmod 0600 ${releaserKeyPath};` +
             '/bin/tini -s -- /usr/local/bin/jenkins.sh'],
   });
   jenkins.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
@@ -110,7 +136,7 @@ exports.New = function New(opts) {
   jenkins.setEnv('TESTING_NAMESPACE', opts.testingNamespace);
   jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
 
-  const files = setupFiles(opts);
+  const files = setupFiles(opts, scp);
   files.forEach((f) => {
     jenkins.filepathToContent[jenkinsStagingDir + f.path] = f.content;
   });

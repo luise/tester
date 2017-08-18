@@ -50,17 +50,18 @@
   <concurrentBuild>false</concurrentBuild>
   <builders>
     <hudson.tasks.Shell>
-      <command>mkdir ${WORKSPACE}/bin
-curl -sL -o ${WORKSPACE}/bin/quilt https://github.com/quilt/quilt/releases/download/${QUILT_VERSION}/quilt_linux
-chmod 755 ${WORKSPACE}/bin/quilt
-
-export GOPATH=${WORKSPACE}/gohome
+        <command>export GOPATH=${WORKSPACE}/gohome
 export PATH=${GOPATH}/bin:${WORKSPACE}/bin:${PATH}
 
 srcPath=$GOPATH/src/github.com/quilt/quilt
 mkdir -p ${srcPath}
-curl -sL https://github.com/quilt/quilt/archive/${QUILT_VERSION}.tar.gz | \
-  tar xz --strip-components=1 -C ${srcPath}
+
+{{copyCommand}}
+tar xzf release.tar.gz --strip-components=1 -C ${srcPath}
+
+mkdir ${WORKSPACE}/bin
+cp ${srcPath}/quilt_linux ${WORKSPACE}/bin/quilt
+chmod 755 ${WORKSPACE}/bin/quilt
 
 cd ${srcPath}/quilt-tester
 go build .

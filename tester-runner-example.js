@@ -3,7 +3,7 @@
 // configure `jenkinsUrl`.
 
 const { createDeployment, Machine } = require('@quilt/quilt');
-const jenkins = require('./jenkins.js');
+const Tester = require('./tester.js');
 
 const deployment = createDeployment();
 const baseMachine = new Machine({ provider: 'Amazon' });
@@ -14,7 +14,7 @@ const worker = baseMachine.asWorker();
 worker.floatingIp = '8.8.8.8';
 deployment.deploy(worker);
 
-deployment.deploy(jenkins.New({
+const tester = new Tester({
   awsAccessKey: 'accessKey',
   awsSecretAccessKey: 'secret',
   gceProjectID: 'projectID',
@@ -29,4 +29,6 @@ deployment.deploy(jenkins.New({
   // (`$`) need to be replaced with `$$`.
   passwordHash: '#jbcrypt:$$2a$$10$$Jcwink6XXoUIp3Ieh.1QR.Mx5idVA7QNLHNcF2jQWhoCA96y5k/jS',
   jenkinsUrl: `http://${worker.floatingIp}:8080`,
-}));
+});
+
+deployment.deploy(tester);

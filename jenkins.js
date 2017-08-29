@@ -148,6 +148,7 @@ exports.New = function New(opts, scp) {
   publicInternet.allowFrom(jenkins, 22); // Required by `quilt ssh`.
   publicInternet.allowFrom(jenkins, 80); // Required by network tests.
   publicInternet.allowFrom(jenkins, 443); // Required by network tests.
+  publicInternet.allowFrom(jenkins, 3000); // Required by the lobsters test.
   publicInternet.allowFrom(jenkins, 8000); // Required by network tests.
   publicInternet.allowFrom(jenkins, 9200); // Required by the elasticsearch test.
   publicInternet.allowFrom(jenkins, 9000); // Required by the Quilt daemon for API communication.

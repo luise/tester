@@ -8,12 +8,12 @@ and copying the resulting file at
 <jenkins.plugins.nodejs.tools.NodeJSInstallation_-DescriptorImpl plugin="nodejs@1.2.1">
     <installations class="jenkins.plugins.nodejs.tools.NodeJSInstallation-array">
         <jenkins.plugins.nodejs.tools.NodeJSInstallation>
-            <name>node-7.10.0</name>
+            <name>node-6.9.0</name>
             <properties>
                 <hudson.tools.InstallSourceProperty>
                     <installers>
                         <jenkins.plugins.nodejs.tools.NodeJSInstaller>
-                            <id>7.10.0</id>
+                            <id>6.9.0</id>
                             <npmPackagesRefreshHours>72</npmPackagesRefreshHours>
                         </jenkins.plugins.nodejs.tools.NodeJSInstaller>
                     </installers>

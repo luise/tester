@@ -81,7 +81,7 @@ fi</command>
   </publishers>
   <buildWrappers>
     <jenkins.plugins.nodejs.NodeJSBuildWrapper plugin="nodejs@1.2.2">
-      <nodeJSInstallationName>node-7.10.0</nodeJSInstallationName>
+      <nodeJSInstallationName>node-6.9.0</nodeJSInstallationName>
     </jenkins.plugins.nodejs.NodeJSBuildWrapper>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.2">
       <goVersion>go-1.8</goVersion>

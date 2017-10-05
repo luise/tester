@@ -125,7 +125,7 @@ manager.addShortText(&quot;${manager.build.buildVariables.get(&apos;PROVIDER&apo
     </hudson.plugins.ws__cleanup.PreBuildCleanup>
     <hudson.plugins.timestamper.TimestamperBuildWrapper plugin="timestamper@1.8.8"/>
     <jenkins.plugins.nodejs.NodeJSBuildWrapper plugin="nodejs@1.2.1">
-        <nodeJSInstallationName>node-7.10.0</nodeJSInstallationName>
+        <nodeJSInstallationName>node-6.9.0</nodeJSInstallationName>
     </jenkins.plugins.nodejs.NodeJSBuildWrapper>
     <org.jenkinsci.plugins.golang.GolangBuildWrapper plugin="golang@1.2">
       <goVersion>go-1.8</goVersion>

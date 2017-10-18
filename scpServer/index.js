@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const quilt = require('@quilt/quilt');
+const kelda = require('kelda');
 const sshpk = require('sshpk');
 
-class SCPServer extends quilt.Container {
+class SCPServer extends kelda.Container {
   /**
    * @param {string} user The username to allow connections to the SCP server.
    * @param {int} port The port the SCP server will listen on.
@@ -14,7 +14,7 @@ class SCPServer extends quilt.Container {
    * @return {void}
    */
   constructor(user, port, userKeyPair, hostKeyPair) {
-    const image = new quilt.Image('scp-server',
+    const image = new kelda.Image('scp-server',
       fs.readFileSync(path.join(__dirname, 'Dockerfile'), { encoding: 'utf8' }));
     const hostKeyType = sshpk.parsePrivateKey(hostKeyPair.priv).type;
     const hostKeyPath = `/etc/ssh/ssh_host_${hostKeyType}_key`;
@@ -44,7 +44,7 @@ class SCPServer extends quilt.Container {
   /**
    * Allow the client to connect to the SCP server.
    *
-   * @param {quilt.Container} client The container to allow inbound connections from.
+   * @param {kelda.Container} client The container to allow inbound connections from.
    * @return {void}
    */
   allowFrom(client) {

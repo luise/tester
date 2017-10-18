@@ -2,7 +2,7 @@
 // of all paramters to `tester.New`. It uses a floating IP to automatically
 // configure `jenkinsUrl`.
 
-const { createDeployment, Machine } = require('@quilt/quilt');
+const { createDeployment, Machine } = require('kelda');
 const Tester = require('./tester.js');
 
 const deployment = createDeployment();
@@ -22,7 +22,7 @@ const tester = new Tester({
   gceClientEmail: 'email',
   digitalOceanKey: 'key',
   testingNamespace: 'integration-tester',
-  slackTeam: 'quilt-dev',
+  slackTeam: 'kelda-dev',
   slackChannel: '#testing',
   slackToken: 'secret',
   // Because of a bug with the `applyTemplate` function, dollar sign literals

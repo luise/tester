@@ -1,4 +1,4 @@
-const quilt = require('@quilt/quilt');
+const kelda = require('kelda');
 const jenkins = require('./jenkins.js');
 const SCPServer = require('./scpServer');
 const sshpk = require('sshpk');
@@ -69,7 +69,7 @@ class Tester {
     this.jenkins = jenkins.New(jenkinsOpts, this.scp);
 
     this.scp.allowFrom(this.jenkins);
-    this.scp.allowFrom(quilt.publicInternet);
+    this.scp.allowFrom(kelda.publicInternet);
   }
 
   deploy(deployment) {
@@ -80,7 +80,7 @@ class Tester {
   /**
    * Place the encapsulated containers according to the given placement rule.
    *
-   * @param {quilt.Placement} plcm The placement rule
+   * @param {kelda.Placement} plcm The placement rule
    * @return {void}
    */
   placeOn(plcm) {

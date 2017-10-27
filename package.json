@@ -4,7 +4,7 @@
   "main": "./tester.js",
   "license": "MIT",
   "dependencies": {
-    "kelda": "0.x",
+    "kelda": ">=0.0.5 <1.0.0",
     "sshpk": "^1.13.1"
   },
   "devDependencies": {

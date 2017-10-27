@@ -2,17 +2,13 @@
 // of all paramters to `tester.New`. It uses a floating IP to automatically
 // configure `jenkinsUrl`.
 
-const { createDeployment, Machine } = require('kelda');
+const { Infrastructure, Machine } = require('kelda');
 const Tester = require('./tester.js');
 
-const deployment = createDeployment();
 const baseMachine = new Machine({ provider: 'Amazon' });
 
-deployment.deploy(baseMachine.asMaster());
-
-const worker = baseMachine.asWorker();
+const worker = baseMachine.clone();
 worker.floatingIp = '8.8.8.8';
-deployment.deploy(worker);
 
 const tester = new Tester({
   awsAccessKey: 'accessKey',
@@ -31,4 +27,5 @@ const tester = new Tester({
   jenkinsUrl: `http://${worker.floatingIp}:8080`,
 });
 
-tester.deploy(deployment);
+const infra = new Infrastructure(baseMachine, worker);
+tester.deploy(infra);

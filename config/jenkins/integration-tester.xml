@@ -6,21 +6,15 @@
   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-        <hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
           <name>PROVIDER</name>
           <description>The provider to use for the test run.</description>
-          <choices class="java.util.Arrays$ArrayList">
-            <a class="string-array">
-              <string>Amazon</string>
-              <string>DigitalOcean</string>
-              <string>Google</string>
-            </a>
-          </choices>
-        </hudson.model.ChoiceParameterDefinition>
+          <defaultValue>{{provider}}</defaultValue>
+        </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>SIZE</name>
           <description>The machine size to use for the test run.</description>
-          <defaultValue></defaultValue>
+          <defaultValue>{{size}}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>KELDA_VERSION</name>
@@ -37,9 +31,7 @@
   <triggers>
     <org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger plugin="parameterized-scheduler@0.4">
       <spec></spec>
-      <parameterizedSpecification>0 0-23/3 * * * %PROVIDER=Amazon;SIZE=m3.medium
-0 1-23/3 * * * %PROVIDER=Google;SIZE=n1-standard-1
-0 2-23/3 * * * %PROVIDER=DigitalOcean;SIZE=2gb</parameterizedSpecification>
+      <parameterizedSpecification>0 * * * *</parameterizedSpecification>
     </org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>
@@ -52,6 +44,7 @@ export PATH=${GOPATH}/bin:${WORKSPACE}/bin:${PATH}
 # Kelda requires that namespaces be lowercase.
 lowerCaseProvider=$(echo ${PROVIDER} | tr '[:upper:]' '[:lower:]')
 export TESTING_NAMESPACE=&quot;${TESTING_NAMESPACE_PREFIX}-${lowerCaseProvider}&quot;
+export KELDA_HOST=&quot;unix://${WORKSPACE}/${TESTING_NAMESPACE}.sock&quot;
 
 srcPath=$GOPATH/src/github.com/kelda/kelda
 mkdir -p ${srcPath}

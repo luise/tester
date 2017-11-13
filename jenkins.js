@@ -8,7 +8,7 @@ const path = require('path');
 // user) before starting Jenkins.
 const jenkinsStagingDir = '/tmp/files/';
 
-const releaserKeyPath = '~/jobs/integration-tester/releaserKey';
+const releaserKeyPath = '~/jobs/releaserKey';
 
 /**
  * trimPrefix removes `prefix` from `str` if it begins with `prefix`.
@@ -74,24 +74,37 @@ function setupFiles(opts, scp) {
     readRel('config/jenkins/node.xml'));
   files.push(nodeConfig);
 
-  const knownHostsPath = '~/jobs/integration-tester/known_hosts';
-  const keldaTesterConfig = new File('jobs/integration-tester/config.xml',
-    applyTemplate(readRel('config/jenkins/integration-tester.xml'),
-      { slackTeam: opts.slackTeam,
-        slackToken: opts.slackToken,
-        slackChannel: opts.slackChannel,
-        // The ${KELDA_VERSION} string is not meant to be evaluated in the Javascript.
-        // It should get expanded by Jenkins when the build runs.
-        // eslint-disable-next-line no-template-curly-in-string
-        copyCommand: scp.getCommand('releases/${KELDA_VERSION}.tar.gz', 'release.tar.gz', {
-          identityFile: releaserKeyPath,
-          knownHostsFile: knownHostsPath,
-        }),
-      }));
-  files.push(keldaTesterConfig);
+  const knownHostsPath = '~/jobs/known_hosts';
   files.push(new File(trimPrefix(releaserKeyPath, '~/'), scp.userKeyPair.priv));
   files.push(new File(trimPrefix(knownHostsPath, '~/'),
     `${scp.getHostname()} ${scp.hostKeyPair.pub}`));
+
+  const templateOpts = {
+    slackTeam: opts.slackTeam,
+    slackToken: opts.slackToken,
+    slackChannel: opts.slackChannel,
+    // The ${KELDA_VERSION} string is not meant to be evaluated in the Javascript.
+    // It should get expanded by Jenkins when the build runs.
+    // eslint-disable-next-line no-template-curly-in-string
+    copyCommand: scp.getCommand('releases/${KELDA_VERSION}.tar.gz', 'release.tar.gz', {
+      identityFile: releaserKeyPath,
+      knownHostsFile: knownHostsPath,
+    }),
+  };
+  const providersToTest = [
+    { provider: 'Amazon', size: 'm3.medium' },
+    { provider: 'Google', size: 'n1-standard-1' },
+    { provider: 'DigitalOcean', size: '2gb' },
+  ];
+  providersToTest.forEach((provider) => {
+    const keldaTesterConfig = new File(
+      `jobs/integration-tester-${provider.provider}/config.xml`,
+      applyTemplate(readRel('config/jenkins/integration-tester.xml'),
+        Object.assign(templateOpts, {
+          provider: provider.provider,
+          size: provider.size })));
+    files.push(keldaTesterConfig);
+  });
 
   const checkDepsConfig = new File('jobs/check-dependencies/config.xml',
     applyTemplate(readRel('config/jenkins/check-dependencies.xml'),

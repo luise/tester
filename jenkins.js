@@ -122,7 +122,7 @@ exports.New = function New(opts, scp) {
     'awsAccessKey', 'awsSecretAccessKey',
     'digitalOceanKey',
     'gceProjectID', 'gcePrivateKey', 'gceClientEmail',
-    'testingNamespace',
+    'testingNamespacePrefix',
     'slackTeam', 'slackChannel', 'slackToken']);
 
   const jenkins = new Container('jenkins', 'keldaio/tester', {
@@ -133,7 +133,7 @@ exports.New = function New(opts, scp) {
   });
   jenkins.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
   jenkins.setEnv('AWS_SECRET_ACCESS_KEY', opts.awsSecretAccessKey);
-  jenkins.setEnv('TESTING_NAMESPACE', opts.testingNamespace);
+  jenkins.setEnv('TESTING_NAMESPACE_PREFIX', opts.testingNamespacePrefix);
   jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
 
   const files = setupFiles(opts, scp);

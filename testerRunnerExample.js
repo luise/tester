@@ -17,7 +17,7 @@ const tester = new Tester({
   gcePrivateKey: 'privateKey',
   gceClientEmail: 'email',
   digitalOceanKey: 'key',
-  testingNamespace: 'integration-tester',
+  testingNamespacePrefix: 'integration-tester',
   slackTeam: 'kelda-dev',
   slackChannel: '#testing',
   slackToken: 'secret',

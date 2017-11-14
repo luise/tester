@@ -28,7 +28,7 @@ provider.
 on the Google provider.
 - `gceClientEmail`: The email address of the service account used to boot
 machines on the Google provider.
-- `testingNamespace`: The namespace used by the test daemon.
+- `testingNamespacePrefix`: The prefix for the namespace used by the test daemon.
 - `slackChannel`: The Slack channel where build results will be posted.
 - `slackTeam`: The Slack team in which `slackChannel` is located.
 - `slackToken`: The token used for posting to `slackChannel`.

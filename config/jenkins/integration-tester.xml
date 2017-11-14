@@ -52,6 +52,10 @@ rm -rf ~/.kelda/tls
 export GOPATH=${WORKSPACE}/gohome
 export PATH=${GOPATH}/bin:${WORKSPACE}/bin:${PATH}
 
+# Kelda requires that namespaces be lowercase.
+lowerCaseProvider=$(echo ${PROVIDER} | tr '[:upper:]' '[:lower:]')
+export TESTING_NAMESPACE=&quot;${TESTING_NAMESPACE_PREFIX}-${lowerCaseProvider}&quot;
+
 srcPath=$GOPATH/src/github.com/kelda/kelda
 mkdir -p ${srcPath}
 

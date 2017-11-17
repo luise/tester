@@ -21,6 +21,11 @@
           <description>The Kelda release to test.</description>
           <defaultValue>dev</defaultValue>
         </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>NUMBER_WORKERS</name>
+          <description>The number of Kelda workers to boot.</description>
+          <defaultValue>3</defaultValue>
+        </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
@@ -74,8 +79,11 @@ make tests
     </hudson.tasks.ArtifactArchiver>
     <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@2.3.1">
       <script plugin="script-security@1.27">
-        <script>manager.addShortText(&quot;${manager.build.buildVariables.get(&apos;KELDA_VERSION&apos;)}&quot;)
-manager.addShortText(&quot;${manager.build.buildVariables.get(&apos;PROVIDER&apos;)}&quot;)</script>
+        <script>
+manager.addShortText(&quot;Version: ${manager.build.buildVariables.get(&apos;KELDA_VERSION&apos;)}&quot;)
+manager.addShortText(&quot;Provider: ${manager.build.buildVariables.get(&apos;PROVIDER&apos;)}&quot;)
+manager.addShortText(&quot;Workers: ${manager.build.buildVariables.get(&apos;NUMBER_WORKERS&apos;)}&quot;)
+        </script>
         <sandbox>false</sandbox>
       </script>
       <behavior>0</behavior>

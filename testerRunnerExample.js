@@ -5,7 +5,13 @@
 const { Infrastructure, Machine } = require('kelda');
 const Tester = require('./tester.js');
 
-const baseMachine = new Machine({ provider: 'Amazon' });
+const baseMachine = new Machine({
+  provider: 'Amazon',
+  // Jenkins requires more memory because it runs up to 3 parallel builds of
+  // the integration tests at a time. This is a problem when running the scale
+  // test.
+  size: 'm4.large',
+});
 
 const worker = baseMachine.clone();
 worker.floatingIp = '8.8.8.8';

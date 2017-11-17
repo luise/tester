@@ -83,7 +83,7 @@ function setupFiles(opts, scp) {
         // The ${KELDA_VERSION} string is not meant to be evaluated in the Javascript.
         // It should get expanded by Jenkins when the build runs.
         // eslint-disable-next-line no-template-curly-in-string
-        copyCommand: scp.getCommand('${KELDA_VERSION}.tar.gz', 'release.tar.gz', {
+        copyCommand: scp.getCommand('releases/${KELDA_VERSION}.tar.gz', 'release.tar.gz', {
           identityFile: releaserKeyPath,
           knownHostsFile: knownHostsPath,
         }),

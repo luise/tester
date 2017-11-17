@@ -68,8 +68,9 @@ class Tester {
     this.scp = new SCPServer(releaseUser, scpPort, userKeyPair, hostKeyPair);
     this.jenkins = jenkins.New(jenkinsOpts, this.scp);
 
-    this.scp.allowFrom(this.jenkins);
-    this.scp.allowFrom(kelda.publicInternet);
+    this.scp.allowSCPFrom(this.jenkins);
+    this.scp.allowSCPFrom(kelda.publicInternet);
+    this.scp.allowHTTPFrom(kelda.publicInternet);
   }
 
   deploy(deployment) {

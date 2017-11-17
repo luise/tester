@@ -3,6 +3,10 @@ const path = require('path');
 const kelda = require('kelda');
 const sshpk = require('sshpk');
 
+// XXX: In order for the releases to be easily downloadable over HTTP, this
+// container also runs an Nginx process. Once Kelda has support for volumes,
+// the Nginx process should be run from another container, and the releases
+// should be shared using a volume.
 class SCPServer extends kelda.Container {
   /**
    * @param {string} user The username to allow connections to the SCP server.
@@ -18,6 +22,10 @@ class SCPServer extends kelda.Container {
       fs.readFileSync(path.join(__dirname, 'Dockerfile'), { encoding: 'utf8' }));
     const hostKeyType = sshpk.parsePrivateKey(hostKeyPair.priv).type;
     const hostKeyPath = `/etc/ssh/ssh_host_${hostKeyType}_key`;
+    const nginxConf = `server {
+      root /home/${user}/releases;
+      location / { autoindex on; }
+    }`;
     super('scp', image, {
       command: ['bash', '-c',
         // XXX: We need to chmod the host's private key because
@@ -25,13 +33,16 @@ class SCPServer extends kelda.Container {
         `chmod 0600 ${hostKeyPath} ` +
           // Create the user, and start the SCP server.
           `&& useradd --shell /usr/bin/rssh ${user} ` +
+          `&& mkdir /home/${user}/releases ` +
           `&& chown -R ${user} /home/${user} ` +
+          '&& nginx ' +
           `&& /usr/sbin/sshd -p ${port} -D -e`,
       ],
       filepathToContent: {
         [`/home/${user}/.ssh/authorized_keys`]: userKeyPair.pub,
         [hostKeyPath]: hostKeyPair.priv,
         [`${hostKeyPath}.pub`]: hostKeyPair.pub,
+        '/etc/nginx/sites-enabled/default': nginxConf,
       },
     });
 
@@ -47,8 +58,17 @@ class SCPServer extends kelda.Container {
    * @param {kelda.Container} client The container to allow inbound connections from.
    * @return {void}
    */
-  allowFrom(client) {
+  allowSCPFrom(client) {
     super.allowFrom(client, this.port);
+  }
+
+  /**
+   * Allow the client to connect to the Nginx server.
+   *
+   * @param {kelda.Container} client The container to allow inbound connections from.
+   */
+  allowHTTPFrom(client) {
+    super.allowFrom(client, 80);
   }
 
   /**

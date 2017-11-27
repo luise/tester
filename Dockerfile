@@ -10,7 +10,7 @@ ADD config/id_rsa /var/jenkins_home/.ssh/id_rsa
 
 RUN /usr/local/bin/install-plugins.sh golang ws-cleanup timestamper slack \
     test-results-analyzer claim nodejs parameterized-scheduler show-build-parameters \
-    groovy-postbuild
+    groovy-postbuild junit-realtime-test-reporter
 
 
 # XXX: We unset the Entrypoint so that blueprints can run arbitrary commands (such

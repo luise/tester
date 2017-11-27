@@ -28,6 +28,7 @@
         </hudson.model.StringParameterDefinition>
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
+    <org.jenkinsci.plugins.junitrealtimetestreporter.PerJobConfiguration plugin="junit-realtime-test-reporter@0.5"/>
   </properties>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
@@ -65,7 +66,7 @@ cd ${srcPath}/integration-tester
 go build .
 make tests
 
-./integration-tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/report.xml</command>
+./integration-tester --preserve-failed -testRoot=./tests -junitOut=${WORKSPACE}/test-results</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
@@ -90,7 +91,7 @@ manager.addShortText(&quot;Workers: ${manager.build.buildVariables.get(&apos;NUM
       <runForMatrixParent>false</runForMatrixParent>
     </org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder>
     <hudson.tasks.junit.JUnitResultArchiver plugin="junit@1.20">
-      <testResults>report.xml</testResults>
+      <testResults>test-results/*.xml</testResults>
       <keepLongStdio>true</keepLongStdio>
       <healthScaleFactor>1.0</healthScaleFactor>
       <allowEmptyResults>false</allowEmptyResults>

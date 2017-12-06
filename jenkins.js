@@ -133,6 +133,7 @@ function setupFiles(opts, scp) {
 exports.New = function New(opts, scp) {
   assertRequiredParameters(opts, [
     'awsAccessKey', 'awsSecretAccessKey',
+    'awsS3AccessKey', 'awsS3SecretAccessKey',
     'digitalOceanKey',
     'gceProjectID', 'gcePrivateKey', 'gceClientEmail',
     'testingNamespacePrefix',
@@ -146,6 +147,10 @@ exports.New = function New(opts, scp) {
   });
   jenkins.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
   jenkins.setEnv('AWS_SECRET_ACCESS_KEY', opts.awsSecretAccessKey);
+  // Set different environment variables with the keys that have access only to
+  // S3.
+  jenkins.setEnv('AWS_S3_ACCESS_KEY_ID', opts.awsS3AccessKey);
+  jenkins.setEnv('AWS_S3_SECRET_ACCESS_KEY', opts.awsS3SecretAccessKey);
   jenkins.setEnv('TESTING_NAMESPACE_PREFIX', opts.testingNamespacePrefix);
   jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
 

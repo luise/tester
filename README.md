@@ -21,6 +21,11 @@ The required configurations are:
 the Amazon provider.
 - `awsSecretAccessKey`: The secret access key used by the test daemon to boot
 machines on the Amazon provider.
+- `awsS3AccessKey`: The access key to pass as a Kelda secret to tests that
+read data from S3. This key needs permissions to read and list the bucket used
+by the Spark integration test.
+- `awsS3SecretAccessKey`: The secret access key corresponding to
+`awsS3AccessKey`.
 - `digitalOceanKey`: The secret key used to boot machines on the DigitalOcean
 provider.
 - `gceProjectID`: The ID of the project in which Google machines will be booted.

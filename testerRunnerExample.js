@@ -19,6 +19,8 @@ worker.floatingIp = '8.8.8.8';
 const tester = new Tester({
   awsAccessKey: 'accessKey',
   awsSecretAccessKey: 'secret',
+  awsS3AccessKey: 's3AccessKey',
+  awsS3SecretAccessKey: 's3Secret',
   gceProjectID: 'projectID',
   gcePrivateKey: 'privateKey',
   gceClientEmail: 'email',

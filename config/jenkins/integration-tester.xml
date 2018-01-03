@@ -80,11 +80,85 @@ make tests
     </hudson.tasks.ArtifactArchiver>
     <org.jvnet.hudson.plugins.groovypostbuild.GroovyPostbuildRecorder plugin="groovy-postbuild@2.3.1">
       <script plugin="script-security@1.27">
-        <script>
-manager.addShortText(&quot;Version: ${manager.build.buildVariables.get(&apos;KELDA_VERSION&apos;)}&quot;)
-manager.addShortText(&quot;Provider: ${manager.build.buildVariables.get(&apos;PROVIDER&apos;)}&quot;)
-manager.addShortText(&quot;Workers: ${manager.build.buildVariables.get(&apos;NUMBER_WORKERS&apos;)}&quot;)
-        </script>
+            <script><![CDATA[import groovy.json.JsonOutput
+import hudson.tasks.test.AbstractTestResultAction
+import hudson.tasks.junit.CaseResult
+import hudson.tasks.junit.TestResult
+
+def notifySlack(channel, attachments) {
+    def slackURL = manager.getEnvVariable('SLACK_WEBHOOK')
+    def jenkinsIcon = 'https://wiki.jenkins-ci.org/download/attachments/2916393/logo.png'
+
+    def payload = JsonOutput.toJson([
+        channel: channel,
+        username: 'jenkins',
+        icon_url: jenkinsIcon,
+        attachments: attachments,
+    ])
+
+    ['curl', '-X', 'POST', '-H', 'Content-type: application/json',
+        '--data', payload, slackURL].execute()
+}
+
+// Make build parameters visible in the list of past jobs.
+def version = manager.build.buildVariables.get('KELDA_VERSION')
+def provider = manager.build.buildVariables.get('PROVIDER')
+def nWorkers = manager.build.buildVariables.get('NUMBER_WORKERS')
+manager.addShortText("Version: ${version}")
+manager.addShortText("Provider: ${provider}")
+manager.addShortText("Workers: ${nWorkers}")
+
+// Post the build result to Slack.
+def testResultAction = manager.build.getAction(AbstractTestResultAction.class)
+def numTotal = testResultAction.getTotalCount()
+def numFailed = testResultAction.getFailCount()
+def numSkipped = testResultAction.getSkipCount()
+def numPassed = numTotal - numFailed - numSkipped
+
+def message = "Passed: ${numPassed}, Failed: ${numFailed}, Skipped: ${numSkipped}"
+def color = 'good'
+if (numTotal == 0) {
+    color = 'warning'
+} else if (numFailed != 0) {
+    message += '\n<!channel> Some tests failed.'
+    color = 'danger'
+}
+
+def buildNumber = manager.getEnvVariable('BUILD_NUMBER')
+def buildURL = manager.getEnvVariable('BUILD_URL')
+def attachments = [
+    [
+        title: "#${buildNumber} - ${provider} | Version ${version} | ${nWorkers} Workers",
+        title_link: "${buildURL}",
+        text: message,
+        color: color,
+    ],
+]
+
+def gitRepoPath = manager.build.getWorkspace().child('gohome/src/github.com/kelda/kelda').toURI()
+def gitCommit = ['git', 'log', '-1', '--pretty=%an | %s'].execute(null, new File(gitRepoPath)).text
+attachments << [
+    title: 'Git Commit',
+    text: gitCommit,
+    color: color,
+]
+
+if (numFailed > 0) {
+    // We have to use getResult() and cast the test result because testResultAction.getFailedTests()
+    // is not defined by the junit-realtime-test-reporter plugin.
+    def testResult = (TestResult) testResultAction.getResult()
+    def failedTestsStr = ''
+    for (CaseResult cr : testResult.getFailedTests()) {
+        failedTestsStr += "<${manager.build.getAbsoluteUrl()}/testReport/${cr.getUrl()}|${cr.getName()}> after ${cr.getDurationString()}\n"
+    }
+    attachments << [
+        title: 'Failed Tests',
+        text: failedTestsStr,
+        color: color,
+    ]
+}
+
+notifySlack(manager.getEnvVariable('SLACK_CHANNEL'), attachments)]]></script>
         <sandbox>false</sandbox>
       </script>
       <behavior>0</behavior>
@@ -97,28 +171,6 @@ manager.addShortText(&quot;Workers: ${manager.build.buildVariables.get(&apos;NUM
       <allowEmptyResults>false</allowEmptyResults>
     </hudson.tasks.junit.JUnitResultArchiver>
     <hudson.plugins.claim.ClaimPublisher plugin="claim@2.9"/>
-    <jenkins.plugins.slack.SlackNotifier plugin="slack@2.2">
-      <baseUrl></baseUrl>
-      <teamDomain>{{slackTeam}}</teamDomain>
-      <authToken>{{slackToken}}</authToken>
-      <authTokenCredentialId></authTokenCredentialId>
-      <botUser>false</botUser>
-      <room>{{slackChannel}}</room>
-      <startNotification>false</startNotification>
-      <notifySuccess>true</notifySuccess>
-      <notifyAborted>true</notifyAborted>
-      <notifyNotBuilt>true</notifyNotBuilt>
-      <notifyUnstable>true</notifyUnstable>
-      <notifyRegression>true</notifyRegression>
-      <notifyFailure>true</notifyFailure>
-      <notifyBackToNormal>true</notifyBackToNormal>
-      <notifyRepeatedFailure>true</notifyRepeatedFailure>
-      <includeTestSummary>true</includeTestSummary>
-      <includeFailedTests>true</includeFailedTests>
-      <commitInfoChoice>AUTHORS_AND_TITLES</commitInfoChoice>
-      <includeCustomMessage>false</includeCustomMessage>
-      <customMessage></customMessage>
-    </jenkins.plugins.slack.SlackNotifier>
   </publishers>
   <buildWrappers>
     <hudson.plugins.ws__cleanup.PreBuildCleanup plugin="ws-cleanup@0.32">

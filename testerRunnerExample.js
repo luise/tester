@@ -26,9 +26,8 @@ const tester = new Tester({
   gceClientEmail: 'email',
   digitalOceanKey: 'key',
   testingNamespacePrefix: 'integration-tester',
-  slackTeam: 'kelda-dev',
   slackChannel: '#testing',
-  slackToken: 'secret',
+  slackWebhook: 'https://hooks.slack.com/services/...',
   // Because of a bug with the `applyTemplate` function, dollar sign literals
   // (`$`) need to be replaced with `$$`.
   passwordHash: '#jbcrypt:$$2a$$10$$Jcwink6XXoUIp3Ieh.1QR.Mx5idVA7QNLHNcF2jQWhoCA96y5k/jS',

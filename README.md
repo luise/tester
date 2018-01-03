@@ -35,8 +35,9 @@ on the Google provider.
 machines on the Google provider.
 - `testingNamespacePrefix`: The prefix for the namespace used by the test daemon.
 - `slackChannel`: The Slack channel where build results will be posted.
-- `slackTeam`: The Slack team in which `slackChannel` is located.
-- `slackToken`: The token used for posting to `slackChannel`.
+- `slackWebhook`: The Slack webhook used to post the build results. This can be
+- generated in the Slack workspace settings. For example, the Kelda Slack
+webhook was generated here https://kelda.slack.com/apps/A0F7XDUAZ-incoming-webhooks.
 
 The optional argments are:
 - `passwordHash`: A Jenkins-compatible hash of the desired password for the `admin` user.

@@ -80,9 +80,6 @@ function setupFiles(opts, scp) {
     `${scp.getHostname()} ${scp.hostKeyPair.pub}`));
 
   const templateOpts = {
-    slackTeam: opts.slackTeam,
-    slackToken: opts.slackToken,
-    slackChannel: opts.slackChannel,
     // The ${KELDA_VERSION} string is not meant to be evaluated in the Javascript.
     // It should get expanded by Jenkins when the build runs.
     // eslint-disable-next-line no-template-curly-in-string
@@ -137,7 +134,7 @@ exports.New = function New(opts, scp) {
     'digitalOceanKey',
     'gceProjectID', 'gcePrivateKey', 'gceClientEmail',
     'testingNamespacePrefix',
-    'slackTeam', 'slackChannel', 'slackToken']);
+    'slackWebhook', 'slackChannel']);
 
   const jenkins = new Container('jenkins', 'keldaio/tester', {
     command: ['/bin/bash', '-c',
@@ -152,6 +149,8 @@ exports.New = function New(opts, scp) {
   jenkins.setEnv('AWS_S3_ACCESS_KEY_ID', opts.awsS3AccessKey);
   jenkins.setEnv('AWS_S3_SECRET_ACCESS_KEY', opts.awsS3SecretAccessKey);
   jenkins.setEnv('TESTING_NAMESPACE_PREFIX', opts.testingNamespacePrefix);
+  jenkins.setEnv('SLACK_WEBHOOK', opts.slackWebhook);
+  jenkins.setEnv('SLACK_CHANNEL', opts.slackChannel);
   jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
 
   const files = setupFiles(opts, scp);

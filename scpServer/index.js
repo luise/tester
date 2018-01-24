@@ -59,7 +59,7 @@ class SCPServer extends kelda.Container {
    * @return {void}
    */
   allowSCPFrom(client) {
-    super.allowFrom(client, this.port);
+    kelda.allowTraffic(client, this, this.port);
   }
 
   /**
@@ -68,7 +68,7 @@ class SCPServer extends kelda.Container {
    * @param {kelda.Container} client The container to allow inbound connections from.
    */
   allowHTTPFrom(client) {
-    super.allowFrom(client, 80);
+    kelda.allowTraffic(client, this, 80);
   }
 
   /**

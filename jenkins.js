@@ -1,4 +1,4 @@
-const { Container, publicInternet } = require('kelda');
+const { Container, publicInternet, allowTraffic } = require('kelda');
 const fs = require('fs');
 const path = require('path');
 
@@ -159,20 +159,20 @@ exports.New = function New(opts, scp) {
   });
 
   // Allow inbound connections to the Jenkins web UI.
-  jenkins.allowFrom(publicInternet, 8080);
+  allowTraffic(publicInternet, jenkins, 8080);
 
   // The tests talk to the deployed machines on various ports. We allow them here.
-  publicInternet.allowFrom(jenkins, 22); // Required by `kelda ssh`.
-  publicInternet.allowFrom(jenkins, 80); // Required by network tests.
-  publicInternet.allowFrom(jenkins, 443); // Required by network tests.
-  publicInternet.allowFrom(jenkins, 3000); // Required by the lobsters test.
-  publicInternet.allowFrom(jenkins, 8000); // Required by network tests.
-  publicInternet.allowFrom(jenkins, 9200); // Required by the elasticsearch test.
-  publicInternet.allowFrom(jenkins, 9000); // Required by the Kelda daemon for API communication.
-  publicInternet.allowFrom(jenkins, 9999); // Required by the Kelda daemon for minion communcation.
+  allowTraffic(jenkins, publicInternet, 22); // Required by `kelda ssh`.
+  allowTraffic(jenkins, publicInternet, 80); // Required by network tests.
+  allowTraffic(jenkins, publicInternet, 443); // Required by network tests.
+  allowTraffic(jenkins, publicInternet, 3000); // Required by the lobsters test.
+  allowTraffic(jenkins, publicInternet, 8000); // Required by network tests.
+  allowTraffic(jenkins, publicInternet, 9200); // Required by the elasticsearch test.
+  allowTraffic(jenkins, publicInternet, 9000); // Required by Kelda daemon for API communication.
+  allowTraffic(jenkins, publicInternet, 9999); // Required by Kelda daemon for minion communcation.
 
   // Allow outbound connections to Git servers. Required by `npm install`.
-  publicInternet.allowFrom(jenkins, 9418);
+  allowTraffic(jenkins, publicInternet, 9418);
 
   return jenkins;
 };

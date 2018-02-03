@@ -166,6 +166,7 @@ exports.New = function New(opts, scp) {
   allowTraffic(jenkins, publicInternet, 80); // Required by network tests.
   allowTraffic(jenkins, publicInternet, 443); // Required by network tests.
   allowTraffic(jenkins, publicInternet, 3000); // Required by the lobsters test.
+  allowTraffic(jenkins, publicInternet, 5601); // Required by the Kibana test.
   allowTraffic(jenkins, publicInternet, 8000); // Required by network tests.
   allowTraffic(jenkins, publicInternet, 9200); // Required by the elasticsearch test.
   allowTraffic(jenkins, publicInternet, 9000); // Required by Kelda daemon for API communication.

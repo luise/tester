@@ -37,7 +37,7 @@
   <triggers>
     <org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger plugin="parameterized-scheduler@0.4">
       <spec></spec>
-      <parameterizedSpecification>0 * * * *</parameterizedSpecification>
+      <parameterizedSpecification>0 */2 * * *</parameterizedSpecification>
     </org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger>
   </triggers>
   <concurrentBuild>false</concurrentBuild>

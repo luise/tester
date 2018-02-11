@@ -144,16 +144,16 @@ exports.New = function New(opts, scp) {
       `chmod 0600 ${releaserKeyPath};` +
             '/bin/tini -s -- /usr/local/bin/jenkins.sh'],
   });
-  jenkins.setEnv('AWS_ACCESS_KEY', opts.awsAccessKey);
-  jenkins.setEnv('AWS_SECRET_ACCESS_KEY', opts.awsSecretAccessKey);
+  jenkins.env.AWS_ACCESS_KEY = opts.awsAccessKey;
+  jenkins.env.AWS_SECRET_ACCESS_KEY = opts.awsSecretAccessKey;
   // Set different environment variables with the keys that have access only to
   // S3.
-  jenkins.setEnv('AWS_S3_ACCESS_KEY_ID', opts.awsS3AccessKey);
-  jenkins.setEnv('AWS_S3_SECRET_ACCESS_KEY', opts.awsS3SecretAccessKey);
-  jenkins.setEnv('TESTING_NAMESPACE_PREFIX', opts.testingNamespacePrefix);
-  jenkins.setEnv('SLACK_WEBHOOK', opts.slackWebhook);
-  jenkins.setEnv('SLACK_CHANNEL', opts.slackChannel);
-  jenkins.setEnv('TZ', '/usr/share/zoneinfo/America/Los_Angeles');
+  jenkins.env.AWS_S3_ACCESS_KEY_ID = opts.awsS3AccessKey;
+  jenkins.env.AWS_S3_SECRET_ACCESS_KEY = opts.awsS3SecretAccessKey;
+  jenkins.env.TESTING_NAMESPACE_PREFIX = opts.testingNamespacePrefix;
+  jenkins.env.SLACK_WEBHOOK = opts.slackWebhook;
+  jenkins.env.SLACK_CHANNEL = opts.slackChannel;
+  jenkins.env.TZ = '/usr/share/zoneinfo/America/Los_Angeles';
 
   const files = setupFiles(opts, scp);
   files.forEach((f) => {

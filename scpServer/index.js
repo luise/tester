@@ -18,15 +18,19 @@ class SCPServer extends kelda.Container {
    * @return {void}
    */
   constructor(user, port, userKeyPair, hostKeyPair) {
-    const image = new kelda.Image('scp-server',
-      fs.readFileSync(path.join(__dirname, 'Dockerfile'), { encoding: 'utf8' }));
+    const image = new kelda.Image({
+      name: 'scp-server',
+      dockerfile: fs.readFileSync(path.join(__dirname, 'Dockerfile'), { encoding: 'utf8' }),
+    });
     const hostKeyType = sshpk.parsePrivateKey(hostKeyPair.priv).type;
     const hostKeyPath = `/etc/ssh/ssh_host_${hostKeyType}_key`;
     const nginxConf = `server {
       root /home/${user}/releases;
       location / { autoindex on; }
     }`;
-    super('scp', image, {
+    super({
+      name: 'scp',
+      image,
       command: ['bash', '-c',
         // XXX: We need to chmod the host's private key because
         // filepathToContent doesn't support setting file modes.

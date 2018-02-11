@@ -136,7 +136,9 @@ exports.New = function New(opts, scp) {
     'testingNamespacePrefix',
     'slackWebhook', 'slackChannel']);
 
-  const jenkins = new Container('jenkins', 'keldaio/tester', {
+  const jenkins = new Container({
+    name: 'jenkins',
+    image: 'keldaio/tester',
     command: ['/bin/bash', '-c',
       `cp -r ${jenkinsStagingDir}. /var/jenkins_home;` +
       `chmod 0600 ${releaserKeyPath};` +

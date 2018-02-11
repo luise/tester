@@ -34,5 +34,5 @@ const tester = new Tester({
   jenkinsUrl: `http://${worker.floatingIp}:8080`,
 });
 
-const infra = new Infrastructure(baseMachine, worker);
+const infra = new Infrastructure({ masters: baseMachine, workers: worker });
 tester.deploy(infra);
